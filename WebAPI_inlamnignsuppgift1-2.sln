@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32228.430
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeoComment", "GeoComment\GeoComment.csproj", "{945ABA44-ECE8-4932-8F83-CF98A9413CCB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{945ABA44-ECE8-4932-8F83-CF98A9413CCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{945ABA44-ECE8-4932-8F83-CF98A9413CCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{945ABA44-ECE8-4932-8F83-CF98A9413CCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{945ABA44-ECE8-4932-8F83-CF98A9413CCB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {527EF7D4-2852-4B81-ABEB-AD69124B0E07}
+	EndGlobalSection
+EndGlobal
