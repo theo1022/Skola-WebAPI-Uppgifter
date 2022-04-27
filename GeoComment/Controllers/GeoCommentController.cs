@@ -44,5 +44,15 @@ namespace GeoComment.Controllers
             return Created("", newComment);
         }
 
+        [HttpGet]
+        [Route("{id:int}")]
+        public ActionResult<CommentResult> GetCommentFromId(int id)
+        {
+            if (id < 1 || id > _ctx.Comments.Count()) return NotFound();
+
+            var comment = _ctx.Comments.First(c => c.Id == id);
+
+            return Ok(comment);
+        }
     }
 }
