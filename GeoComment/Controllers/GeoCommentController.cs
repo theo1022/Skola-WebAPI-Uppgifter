@@ -57,8 +57,11 @@ namespace GeoComment.Controllers
 
         [HttpGet]
         public ActionResult<Array> GetCommentsWithingRange(
-            int minLon, int maxLon, int minLat, int maxLat)
+            int? minLon, int? maxLon, int? minLat, int? maxLat)
         {
+            if (minLon == null || maxLon == null ||
+                minLat == null || maxLat == null) return BadRequest();
+
             var comments = _ctx.Comments.Where(c =>
                 c.Longitude >= minLon && c.Longitude <= maxLon &&
                 c.Latitude >= minLat && c.Latitude <= maxLat).ToArray();
