@@ -27,17 +27,17 @@ namespace GeoComment.Controllers
         [HttpPost]
         [ApiVersion("0.2")]
         [Route("register")]
-        public async Task<IActionResult> RegisterNewUser(NewUser userInput)
+        public async Task<IActionResult> RegisterNewUser(NewUser input)
         {
             var user = new User()
             {
-                UserName = userInput.UserName
+                UserName = input.UserName
             };
 
-            await _userManager.CreateAsync(user, userInput.Password);
+            await _userManager.CreateAsync(user, input.Password);
 
             var successfullyCreated =
-                await _userManager.CheckPasswordAsync(user, userInput.Password);
+                await _userManager.CheckPasswordAsync(user, input.Password);
 
             if (!successfullyCreated) return BadRequest();
 

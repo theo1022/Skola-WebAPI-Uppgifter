@@ -5,6 +5,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GeoComment.Controllers
 {
+    public class NewCommentV0_2
+    {
+        public string Message { get; set; }
+        public string Author { get; set; }
+        public int Longitude { get; set; }
+        public int Latitude { get; set; }
+    }
+
     [Route("api/geo-comments")]
     [ApiController]
     public class GeoCommentControllerV0_2 : ControllerBase
@@ -19,9 +27,9 @@ namespace GeoComment.Controllers
         [HttpPost]
         [Authorize]
         [ApiVersion("0.2")]
-        public ActionResult<CommentResult> PostNewComment(CommentInput input)
+        public ActionResult<Comment> PostNewComment(NewCommentV0_2 input)
         {
-            var newComment = new CommentResult()
+            var newComment = new Comment()
             {
                 Message = input.Message,
                 Author = input.Author,

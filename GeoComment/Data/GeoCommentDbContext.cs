@@ -8,6 +8,6 @@ namespace GeoComment.Data
     {
         public GeoCommentDbContext(DbContextOptions options) : base(options) { }
 
-        public DbSet<CommentResult> Comments { get; set; }
+        public DbSet<Comment> Comments { get; set; }
     }
 }
