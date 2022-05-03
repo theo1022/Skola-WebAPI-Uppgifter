@@ -1,4 +1,5 @@
 using GeoComment.Data;
+using GeoComment.Models;
 using GeoComment.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
@@ -17,6 +18,13 @@ builder.Services.AddScoped<DatabaseHandler>();
 var connectionString = builder.Configuration.GetConnectionString("Default");
 builder.Services.AddDbContext<GeoCommentDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+#region Identity
+
+builder.Services.AddIdentityCore<User>()
+    .AddEntityFrameworkStores<GeoCommentDbContext>();
+
+#endregion
 
 #region Verison
 
