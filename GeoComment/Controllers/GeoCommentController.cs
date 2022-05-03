@@ -19,6 +19,8 @@ namespace GeoComment.Controllers
         }
 
         [HttpGet]
+        [ApiVersion("0.1")]
+        [ApiVersion("0.2")]
         [Route("/test/reset-db")]
         public async Task<IActionResult> ResetDatabase()
         {
@@ -28,6 +30,7 @@ namespace GeoComment.Controllers
         }
 
         [HttpPost]
+        [ApiVersion("0.1")]
         public ActionResult<CommentResult> PostNewComment(CommentInput input)
         {
             var newComment = new CommentResult()
@@ -45,6 +48,7 @@ namespace GeoComment.Controllers
         }
 
         [HttpGet]
+        [ApiVersion("0.1")]
         [Route("{id:int}")]
         public ActionResult<CommentResult> GetCommentFromId(int id)
         {
@@ -56,6 +60,7 @@ namespace GeoComment.Controllers
         }
 
         [HttpGet]
+        [ApiVersion("0.1")]
         public ActionResult<Array> GetCommentsWithingRange(
             int? minLon, int? maxLon, int? minLat, int? maxLat)
         {
