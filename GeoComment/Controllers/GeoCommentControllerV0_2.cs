@@ -1,16 +1,37 @@
 ﻿using GeoComment.Data;
 using GeoComment.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GeoComment.Controllers
 {
     public class NewCommentV0_2
     {
-        public string Message { get; set; }
-        public string Author { get; set; }
+        public NewCommentBody Body { get; set; }
         public int Longitude { get; set; }
         public int Latitude { get; set; }
+    }
+    public class NewCommentBody
+    {
+        public string Title { get; set; }
+        public string Message { get; set; }
+    }
+
+    public class ReturnComment
+    {
+        public int id { get; set; }
+        public ReturnBody body { get; set; }
+        public int longitude { get; set; }
+        public int latitude { get; set; }
+    }
+    public class ReturnBody
+    {
+        public string author { get; set; }
+        public string title { get; set; }
+        public string message { get; set; }
+
     }
 
     [Route("api/geo-comments")]
@@ -18,29 +39,54 @@ namespace GeoComment.Controllers
     public class GeoCommentControllerV0_2 : ControllerBase
     {
         private readonly GeoCommentDbContext _ctx;
+        private readonly UserManager<User> _userManager;
 
-        public GeoCommentControllerV0_2(GeoCommentDbContext ctx)
+        public GeoCommentControllerV0_2(GeoCommentDbContext ctx, UserManager<User> userManager)
         {
             _ctx = ctx;
+            _userManager = userManager;
         }
 
         [HttpPost]
         [Authorize]
         [ApiVersion("0.2")]
-        public ActionResult<Comment> PostNewComment(NewCommentV0_2 input)
+        public async Task<ActionResult<Comment>> PostNewComment(NewCommentV0_2 input)
         {
+            var user = await _userManager.GetUserAsync(User);
+
             var newComment = new Comment()
             {
-                Message = input.Message,
-                Author = input.Author,
+                Title = input.Body.Title,
+                Message = input.Body.Message,
+                Author = user.UserName,
                 Longitude = input.Longitude,
                 Latitude = input.Latitude
             };
 
-            _ctx.Comments.Add(newComment);
-            _ctx.SaveChanges();
+            await _ctx.Comments.AddAsync(newComment);
+            await _ctx.SaveChangesAsync();
 
-            return Created("", newComment);
+            var createdComment = await _ctx.Comments.FirstAsync(c =>
+                    c.Author == newComment.Author &&
+                    c.Title == newComment.Title &&
+                    c.Message == newComment.Message &&
+                    c.Longitude == newComment.Longitude &&
+                    c.Latitude == newComment.Latitude);
+
+            var addedComment = new ReturnComment()
+            {
+                id = createdComment.Id,
+                longitude = createdComment.Longitude,
+                latitude = createdComment.Longitude,
+                body = new ReturnBody()
+                {
+                    author = createdComment.Author,
+                    title = createdComment.Title,
+                    message = createdComment.Message,
+                }
+            };
+
+            return Created("", addedComment);
         }
     }
 }
