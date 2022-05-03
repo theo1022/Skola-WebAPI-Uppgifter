@@ -38,7 +38,7 @@ builder.Services.AddIdentityCore<User>()
 
 #endregion
 
-#region Verison
+#region Version
 
 builder.Services.AddApiVersioning(o =>
 {

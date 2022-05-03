@@ -1,32 +1,18 @@
 ﻿using GeoComment.Data;
 using GeoComment.Models;
-using GeoComment.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GeoComment.Controllers
 {
     [Route("api/geo-comments")]
     [ApiController]
-    public class GeoCommentController : ControllerBase
+    public class GeoCommentControllerV0_1 : ControllerBase
     {
         private readonly GeoCommentDbContext _ctx;
-        private readonly DatabaseHandler _databaseHandler;
 
-        public GeoCommentController(GeoCommentDbContext ctx, DatabaseHandler databaseHandler)
+        public GeoCommentControllerV0_1(GeoCommentDbContext ctx)
         {
             _ctx = ctx;
-            _databaseHandler = databaseHandler;
-        }
-
-        [HttpGet]
-        [ApiVersion("0.1")]
-        [ApiVersion("0.2")]
-        [Route("/test/reset-db")]
-        public async Task<IActionResult> ResetDatabase()
-        {
-            await _databaseHandler.RecreateDb();
-
-            return Ok();
         }
 
         [HttpPost]
