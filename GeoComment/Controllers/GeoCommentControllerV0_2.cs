@@ -113,5 +113,37 @@ namespace GeoComment.Controllers
 
             return Ok(comment);
         }
+
+        [HttpGet]
+        [ApiVersion("0.2")]
+        [Route("{username}")]
+        public ActionResult<Array> GetCommentFromUsername(string username)
+        {
+            var rawComments = _ctx.Comments.Where(c => c.Author == username)
+                .ToList();
+
+            if (rawComments.Count == 0) return NotFound();
+
+            var returnComments = new List<ReturnComment>();
+
+            foreach (var rawComment in rawComments)
+            {
+                var comment = new ReturnComment()
+                {
+                    id = rawComment.Id,
+                    longitude = rawComment.Longitude,
+                    latitude = rawComment.Latitude,
+                    body = new ReturnBody()
+                    {
+                        author = rawComment.Author,
+                        title = rawComment.Title,
+                        message = rawComment.Message
+                    }
+                };
+                returnComments.Add(comment);
+            }
+
+            return Ok(returnComments.ToArray());
+        }
     }
 }
