@@ -55,7 +55,7 @@ namespace GeoComment.Controllers
 
         [HttpGet]
         [ApiVersion("0.1")]
-        public ActionResult<Array> GetCommentsWithingRange(
+        public ActionResult<Array> GetCommentsWithinRange(
             int? minLon, int? maxLon, int? minLat, int? maxLat)
         {
             if (minLon == null || maxLon == null ||

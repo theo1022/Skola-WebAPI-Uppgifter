@@ -1,10 +1,13 @@
 using GeoComment.Data;
 using GeoComment.Models;
 using GeoComment.Services;
+using GeoComment.Swagger;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,15 +45,36 @@ builder.Services.AddIdentityCore<User>()
 
 builder.Services.AddApiVersioning(o =>
 {
-    o.DefaultApiVersion = new ApiVersion(0, 1); //Behövs kanske inte
-    o.AssumeDefaultVersionWhenUnspecified = true; //Behövs kanske inte
-    o.ReportApiVersions = true; //Behövs förmodligen inte
+    o.DefaultApiVersion = new ApiVersion(0, 1);
+    o.AssumeDefaultVersionWhenUnspecified = true;
+    o.ReportApiVersions = true;
 
     o.ApiVersionReader = new QueryStringApiVersionReader("api-version");
 });
 
 #endregion
 
+#region Swagger Version Automatic
+
+builder.Services.AddTransient<SwaggerGenOptions>();
+
+builder.Services.AddVersionedApiExplorer(o =>
+{
+    o.GroupNameFormat = "'v'VVV";
+    o.SubstituteApiVersionInUrl = true;
+});
+
+builder.Services
+    .AddTransient<IConfigureOptions<SwaggerGenOptions>,
+        ConfigureSwaggerGenOptions>();
+
+
+builder.Services.AddSwaggerGen(o =>
+{
+    o.OperationFilter<AddApiVersionExampleValueOperationFilter>();
+});
+
+#endregion
 
 var app = builder.Build();
 
@@ -58,7 +82,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(o =>
+    {
+        o.SwaggerEndpoint($"/swagger/v0.1/swagger.json", "v0.1");
+        o.SwaggerEndpoint("/swagger/v0.2/swagger.json", "v0.2");
+    });
 }
 
 app.UseHttpsRedirection();
