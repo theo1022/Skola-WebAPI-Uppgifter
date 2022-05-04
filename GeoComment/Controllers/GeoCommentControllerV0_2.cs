@@ -77,7 +77,7 @@ namespace GeoComment.Controllers
             {
                 id = createdComment.Id,
                 longitude = createdComment.Longitude,
-                latitude = createdComment.Longitude,
+                latitude = createdComment.Latitude,
                 body = new ReturnBody()
                 {
                     author = createdComment.Author,
@@ -87,6 +87,31 @@ namespace GeoComment.Controllers
             };
 
             return Created("", addedComment);
+        }
+
+        [HttpGet]
+        [ApiVersion("0.2")]
+        [Route("{id:int}")]
+        public ActionResult<Comment> GetCommentFromId(int id)
+        {
+            if (id < 1 || id > _ctx.Comments.Count()) return NotFound();
+
+            var rawComment = _ctx.Comments.First(c => c.Id == id);
+
+            var comment = new ReturnComment()
+            {
+                id = rawComment.Id,
+                longitude = rawComment.Longitude,
+                latitude = rawComment.Latitude,
+                body = new ReturnBody()
+                {
+                    author = rawComment.Author,
+                    title = rawComment.Title,
+                    message = rawComment.Message
+                }
+            };
+
+            return Ok(comment);
         }
     }
 }
