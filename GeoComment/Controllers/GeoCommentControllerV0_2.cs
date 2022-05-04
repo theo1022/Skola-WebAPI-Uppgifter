@@ -145,5 +145,39 @@ namespace GeoComment.Controllers
 
             return Ok(returnComments.ToArray());
         }
+
+        [HttpGet]
+        [ApiVersion("0.2")]
+        public ActionResult<Array> GetCommentsWithingRange(
+            int? minLon, int? maxLon, int? minLat, int? maxLat)
+        {
+            if (minLon == null || maxLon == null ||
+                minLat == null || maxLat == null) return BadRequest();
+
+            var rawComments = _ctx.Comments.Where(c =>
+                c.Longitude >= minLon && c.Longitude <= maxLon &&
+                c.Latitude >= minLat && c.Latitude <= maxLat).ToList();
+
+            var returnComments = new List<ReturnComment>();
+
+            foreach (var rawComment in rawComments)
+            {
+                var comment = new ReturnComment()
+                {
+                    id = rawComment.Id,
+                    longitude = rawComment.Longitude,
+                    latitude = rawComment.Latitude,
+                    body = new ReturnBody()
+                    {
+                        author = rawComment.Author,
+                        title = rawComment.Title,
+                        message = rawComment.Message
+                    }
+                };
+                returnComments.Add(comment);
+            }
+
+            return Ok(returnComments.ToArray());
+        }
     }
 }
