@@ -7,32 +7,36 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GeoComment.Controllers
 {
+    #region Input comment format - DTO's
     public class NewCommentV0_2
     {
-        public NewCommentBody Body { get; set; }
+        public NewCommentV0_2Body Body { get; set; }
         public int Longitude { get; set; }
         public int Latitude { get; set; }
     }
-    public class NewCommentBody
+    public class NewCommentV0_2Body
     {
         public string Title { get; set; }
         public string Message { get; set; }
     }
+    #endregion
 
+    #region Return comment format - DTO's
     public class ReturnComment
     {
         public int id { get; set; }
-        public ReturnBody body { get; set; }
+        public ReturnCommentBody Body { get; set; }
         public int longitude { get; set; }
         public int latitude { get; set; }
     }
-    public class ReturnBody
+    public class ReturnCommentBody
     {
         public string author { get; set; }
         public string title { get; set; }
         public string message { get; set; }
 
     }
+    #endregion
 
     [Route("api/geo-comments")]
     [ApiController]
@@ -47,20 +51,68 @@ namespace GeoComment.Controllers
             _userManager = userManager;
         }
 
+        #region Controller Utility methods
+        /// <summary>
+        /// Converts a <see cref="Comment"/> received from the database to a format meant as output to user
+        /// </summary>
+        /// <param name="rawComment"></param>
+        /// <returns><see cref="ReturnComment"/></returns>
+        private ReturnComment BuildReturnComment(Comment rawComment)
+        {
+            var comment = new ReturnComment()
+            {
+                id = rawComment.Id,
+                longitude = rawComment.Longitude,
+                latitude = rawComment.Latitude,
+                Body = new ReturnCommentBody()
+                {
+                    author = rawComment.Author,
+                    title = rawComment.Title,
+                    message = rawComment.Message
+                }
+            };
+
+            return comment;
+        }
+        /// <summary>
+        /// Converts <see cref="IQueryable"/>&lt;<see cref="Comment"/>&gt; received from the database to a format meant as output to user
+        /// </summary>
+        /// <param name="rawComments"></param>
+        /// <returns><see cref="Array"/>&lt;<see cref="ReturnComment"/>&gt;</returns>
+        private Array GetArrayOfReturnComments(IQueryable<Comment> rawComments)
+        {
+            var returnComments = new List<ReturnComment>();
+
+            foreach (var rawComment in rawComments)
+            {
+                var comment = BuildReturnComment(rawComment);
+
+                returnComments.Add(comment);
+            }
+
+            return returnComments.ToArray();
+        }
+        #endregion
+
+        /// <summary>
+        /// Converts a <see cref="NewCommentV0_2"/> to be stored in database returns a format meant as output to user
+        /// </summary>
+        /// <param name="inputBody"></param>
+        /// <returns><see cref="CreatedResult"/>(<see cref="ReturnComment"/>)</returns>
         [HttpPost]
         [Authorize]
         [ApiVersion("0.2")]
-        public async Task<ActionResult<Comment>> PostNewComment(NewCommentV0_2 input)
+        public async Task<ActionResult<ReturnComment>> PostNewComment(NewCommentV0_2 inputBody)
         {
             var user = await _userManager.GetUserAsync(User);
 
             var newComment = new Comment()
             {
-                Title = input.Body.Title,
-                Message = input.Body.Message,
+                Title = inputBody.Body.Title,
+                Message = inputBody.Body.Message,
                 Author = user.UserName,
-                Longitude = input.Longitude,
-                Latitude = input.Latitude
+                Longitude = inputBody.Longitude,
+                Latitude = inputBody.Latitude
             };
 
             await _ctx.Comments.AddAsync(newComment);
@@ -73,79 +125,57 @@ namespace GeoComment.Controllers
                     c.Longitude == newComment.Longitude &&
                     c.Latitude == newComment.Latitude);
 
-            var addedComment = new ReturnComment()
-            {
-                id = createdComment.Id,
-                longitude = createdComment.Longitude,
-                latitude = createdComment.Latitude,
-                body = new ReturnBody()
-                {
-                    author = createdComment.Author,
-                    title = createdComment.Title,
-                    message = createdComment.Message,
-                }
-            };
+            var returnComment = BuildReturnComment(createdComment);
 
-            return Created("", addedComment);
+            return Created("", returnComment);
         }
 
+        /// <summary>
+        /// Finds the comment with the same id as the given path of the uri and returns it as a format meant as output to user
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns><see cref="ReturnComment"/> if comments exist, or <see cref="NotFoundResult"/> if no comment is found</returns>
         [HttpGet]
         [ApiVersion("0.2")]
         [Route("{id:int}")]
-        public ActionResult<Comment> GetCommentFromId(int id)
+        public ActionResult<ReturnComment> GetCommentFromId(int id)
         {
             if (id < 1 || id > _ctx.Comments.Count()) return NotFound();
 
             var rawComment = _ctx.Comments.First(c => c.Id == id);
 
-            var comment = new ReturnComment()
-            {
-                id = rawComment.Id,
-                longitude = rawComment.Longitude,
-                latitude = rawComment.Latitude,
-                body = new ReturnBody()
-                {
-                    author = rawComment.Author,
-                    title = rawComment.Title,
-                    message = rawComment.Message
-                }
-            };
+            var comment = BuildReturnComment(rawComment);
 
             return Ok(comment);
         }
 
+        /// <summary>
+        /// Finds all comments made by the username in the given path and returns them as a format meant as output to user
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns><see cref="Array"/>&lt;<see cref="ReturnComment"/>&gt; if comments exist, or <see cref="NotFoundResult"/> if no comment is found</returns>
         [HttpGet]
         [ApiVersion("0.2")]
         [Route("{username}")]
         public ActionResult<Array> GetCommentFromUsername(string username)
         {
-            var rawComments = _ctx.Comments.Where(c => c.Author == username)
-                .ToList();
+            var rawComments = _ctx.Comments.Where(c => c.Author == username);
 
-            if (rawComments.Count == 0) return NotFound();
+            if (rawComments.Count() == 0) return NotFound();
 
-            var returnComments = new List<ReturnComment>();
+            var returnComments = GetArrayOfReturnComments(rawComments);
 
-            foreach (var rawComment in rawComments)
-            {
-                var comment = new ReturnComment()
-                {
-                    id = rawComment.Id,
-                    longitude = rawComment.Longitude,
-                    latitude = rawComment.Latitude,
-                    body = new ReturnBody()
-                    {
-                        author = rawComment.Author,
-                        title = rawComment.Title,
-                        message = rawComment.Message
-                    }
-                };
-                returnComments.Add(comment);
-            }
-
-            return Ok(returnComments.ToArray());
+            return Ok(returnComments);
         }
 
+        /// <summary>
+        /// Finds all comments that fall within the range of the parameters given as queries and returns them as a format meant as output to user
+        /// </summary>
+        /// <param name="minLon"></param>
+        /// <param name="maxLon"></param>
+        /// <param name="minLat"></param>
+        /// <param name="maxLat"></param>
+        /// <returns><see cref="Array"/>&lt;<see cref="ReturnComment"/>&gt; if succesfull, or <see cref="BadRequestResult"/> if any of the queries is not specified</returns>
         [HttpGet]
         [ApiVersion("0.2")]
         public ActionResult<Array> GetCommentsWithinRange(
@@ -156,28 +186,11 @@ namespace GeoComment.Controllers
 
             var rawComments = _ctx.Comments.Where(c =>
                 c.Longitude >= minLon && c.Longitude <= maxLon &&
-                c.Latitude >= minLat && c.Latitude <= maxLat).ToList();
+                c.Latitude >= minLat && c.Latitude <= maxLat);
 
-            var returnComments = new List<ReturnComment>();
+            var returnComments = GetArrayOfReturnComments(rawComments);
 
-            foreach (var rawComment in rawComments)
-            {
-                var comment = new ReturnComment()
-                {
-                    id = rawComment.Id,
-                    longitude = rawComment.Longitude,
-                    latitude = rawComment.Latitude,
-                    body = new ReturnBody()
-                    {
-                        author = rawComment.Author,
-                        title = rawComment.Title,
-                        message = rawComment.Message
-                    }
-                };
-                returnComments.Add(comment);
-            }
-
-            return Ok(returnComments.ToArray());
+            return Ok(returnComments);
         }
     }
 }

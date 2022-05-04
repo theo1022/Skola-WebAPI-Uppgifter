@@ -20,29 +20,23 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<DatabaseHandler>();
 
 #region Database connection
-
 var connectionString = builder.Configuration.GetConnectionString("Default");
 builder.Services.AddDbContext<GeoCommentDbContext>(options =>
     options.UseSqlServer(connectionString));
 #endregion
 
 #region Authentication
-
 builder.Services.AddAuthentication("BasicAuthentication")
     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(
         "BasicAuthentication", null);
-
 #endregion
 
 #region Identity
-
 builder.Services.AddIdentityCore<User>()
     .AddEntityFrameworkStores<GeoCommentDbContext>();
-
 #endregion
 
-#region Version
-
+#region Versioning
 builder.Services.AddApiVersioning(o =>
 {
     o.DefaultApiVersion = new ApiVersion(0, 1);
@@ -51,17 +45,13 @@ builder.Services.AddApiVersioning(o =>
 
     o.ApiVersionReader = new QueryStringApiVersionReader("api-version");
 });
-
 #endregion
 
-#region Swagger Version Automatic
-
+#region Swagger Versioning Automatic
 builder.Services.AddTransient<SwaggerGenOptions>();
-
 builder.Services.AddVersionedApiExplorer(o =>
 {
     o.GroupNameFormat = "'v'VVV";
-    o.SubstituteApiVersionInUrl = true;
 });
 
 builder.Services
@@ -73,7 +63,6 @@ builder.Services.AddSwaggerGen(o =>
 {
     o.OperationFilter<AddApiVersionExampleValueOperationFilter>();
 });
-
 #endregion
 
 var app = builder.Build();
