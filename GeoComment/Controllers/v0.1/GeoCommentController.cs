@@ -1,36 +1,33 @@
 ﻿using GeoComment.Data;
 using GeoComment.Models;
-using GeoComment.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GeoComment.Controllers
+namespace GeoComment.Controllers.v0._1
 {
+    public class NewComment
+    {
+        public string Message { get; set; }
+        public string Author { get; set; }
+        public int Longitude { get; set; }
+        public int Latitude { get; set; }
+    }
+
     [Route("api/geo-comments")]
     [ApiController]
     public class GeoCommentController : ControllerBase
     {
         private readonly GeoCommentDbContext _ctx;
-        private readonly DatabaseHandler _databaseHandler;
 
-        public GeoCommentController(GeoCommentDbContext ctx, DatabaseHandler databaseHandler)
+        public GeoCommentController(GeoCommentDbContext ctx)
         {
             _ctx = ctx;
-            _databaseHandler = databaseHandler;
-        }
-
-        [HttpGet]
-        [Route("/test/reset-db")]
-        public async Task<IActionResult> ResetDatabase()
-        {
-            await _databaseHandler.RecreateDb();
-
-            return Ok();
         }
 
         [HttpPost]
-        public ActionResult<CommentResult> PostNewComment(CommentInput input)
+        [ApiVersion("0.1")]
+        public ActionResult<Comment> PostNewComment(NewComment input)
         {
-            var newComment = new CommentResult()
+            var newComment = new Comment()
             {
                 Message = input.Message,
                 Author = input.Author,
@@ -45,8 +42,9 @@ namespace GeoComment.Controllers
         }
 
         [HttpGet]
+        [ApiVersion("0.1")]
         [Route("{id:int}")]
-        public ActionResult<CommentResult> GetCommentFromId(int id)
+        public ActionResult<Comment> GetCommentFromId(int id)
         {
             if (id < 1 || id > _ctx.Comments.Count()) return NotFound();
 
@@ -56,7 +54,8 @@ namespace GeoComment.Controllers
         }
 
         [HttpGet]
-        public ActionResult<Array> GetCommentsWithingRange(
+        [ApiVersion("0.1")]
+        public ActionResult<Array> GetCommentsWithinRange(
             int? minLon, int? maxLon, int? minLat, int? maxLat)
         {
             if (minLon == null || maxLon == null ||

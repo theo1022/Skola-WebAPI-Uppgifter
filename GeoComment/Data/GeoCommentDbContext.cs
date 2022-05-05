@@ -1,12 +1,13 @@
 ﻿using GeoComment.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace GeoComment.Data
 {
-    public class GeoCommentDbContext : DbContext
+    public class GeoCommentDbContext : IdentityDbContext<User>
     {
         public GeoCommentDbContext(DbContextOptions options) : base(options) { }
 
-        public DbSet<CommentResult> Comments { get; set; }
+        public DbSet<Comment> Comments { get; set; }
     }
 }
