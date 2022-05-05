@@ -2,9 +2,9 @@
 using GeoComment.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GeoComment.Controllers
+namespace GeoComment.Controllers.v0._1
 {
-    public class NewCommentV0_1
+    public class NewComment
     {
         public string Message { get; set; }
         public string Author { get; set; }
@@ -14,18 +14,18 @@ namespace GeoComment.Controllers
 
     [Route("api/geo-comments")]
     [ApiController]
-    public class GeoCommentControllerV0_1 : ControllerBase
+    public class GeoCommentController : ControllerBase
     {
         private readonly GeoCommentDbContext _ctx;
 
-        public GeoCommentControllerV0_1(GeoCommentDbContext ctx)
+        public GeoCommentController(GeoCommentDbContext ctx)
         {
             _ctx = ctx;
         }
 
         [HttpPost]
         [ApiVersion("0.1")]
-        public ActionResult<Comment> PostNewComment(NewCommentV0_1 input)
+        public ActionResult<Comment> PostNewComment(NewComment input)
         {
             var newComment = new Comment()
             {

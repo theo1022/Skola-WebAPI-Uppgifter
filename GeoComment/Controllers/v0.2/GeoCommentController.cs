@@ -5,16 +5,16 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace GeoComment.Controllers
+namespace GeoComment.Controllers.v0._2
 {
     #region Input comment format - DTO's
-    public class NewCommentV0_2
+    public class NewComment
     {
-        public NewCommentV0_2Body Body { get; set; }
+        public NewCommentBody Body { get; set; }
         public int Longitude { get; set; }
         public int Latitude { get; set; }
     }
-    public class NewCommentV0_2Body
+    public class NewCommentBody
     {
         public string Title { get; set; }
         public string Message { get; set; }
@@ -40,12 +40,12 @@ namespace GeoComment.Controllers
 
     [Route("api/geo-comments")]
     [ApiController]
-    public class GeoCommentControllerV0_2 : ControllerBase
+    public class GeoCommentController : ControllerBase
     {
         private readonly GeoCommentDbContext _ctx;
         private readonly UserManager<User> _userManager;
 
-        public GeoCommentControllerV0_2(GeoCommentDbContext ctx, UserManager<User> userManager)
+        public GeoCommentController(GeoCommentDbContext ctx, UserManager<User> userManager)
         {
             _ctx = ctx;
             _userManager = userManager;
@@ -95,14 +95,14 @@ namespace GeoComment.Controllers
         #endregion
 
         /// <summary>
-        /// Converts a <see cref="NewCommentV0_2"/> to be stored in database returns a format meant as output to user
+        /// Converts a <see cref="NewComment"/> to be stored in database returns a format meant as output to user
         /// </summary>
         /// <param name="inputBody"></param>
         /// <returns><see cref="CreatedResult"/>(<see cref="ReturnComment"/>)</returns>
         [HttpPost]
         [Authorize]
         [ApiVersion("0.2")]
-        public async Task<ActionResult<ReturnComment>> PostNewComment(NewCommentV0_2 inputBody)
+        public async Task<ActionResult<ReturnComment>> PostNewComment(NewComment inputBody)
         {
             var user = await _userManager.GetUserAsync(User);
 

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -62,6 +63,16 @@ builder.Services
 builder.Services.AddSwaggerGen(o =>
 {
     o.OperationFilter<AddApiVersionExampleValueOperationFilter>();
+    o.OperationFilter<SecurityRequirementsOperationFilter>();
+
+    o.AddSecurityDefinition("BasicAuth", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "basic",
+        In = ParameterLocation.Header,
+        Description = "Basic Authorization header using the Basic scheme."
+    });
 });
 #endregion
 
